@@ -68,14 +68,15 @@ export class Render {
       this.innerCellSize,
       this.innerCellSize
     );
+    this.ctx.fillStyle = "#000";
   }
 
   drawBoard(input: Input) {
     this.drawGrid();
-    input.board.pieces.forEach(piece => this.drawPiece(piece));
     if (input.focusedSquare) {
       this.highlightSquare(input.focusedSquare, "selected");
     }
+    input.board.pieces.forEach(piece => this.drawPiece(piece));
   }
 }
 
@@ -110,7 +111,17 @@ export class Input {
     const {x, y} = this.canvasCoords(event.offsetX, event.offsetY);
     const position = this.boardCoords(x, y);
 
-    this.focusedSquare = position;
+    if (!position) return;
+
+    if (this.focusedSquare) {
+      const move = new Move(this.focusedSquare, position);
+      if (this.board.moveIsValid(move)) {
+        this.board.playMove(move);
+      }
+      this.focusedSquare = null;
+    } else {
+      this.focusedSquare = position;
+    }
   }
 
   hearMouseupEvent(event: Event) {
@@ -130,6 +141,7 @@ export class Input {
           if (this.board.moveIsValid(move)) {
             this.board.playMove(move);
           }
+          this.focusedSquare = null;
         }
       } else {
         return;
