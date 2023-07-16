@@ -1,3 +1,4 @@
+import { Board } from "./board.js";
 import { EngineLoop } from "./engineLoop.js";
 
 const canvas = document.getElementById("game-canvas");
@@ -7,4 +8,9 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) throw new Error("Missing 
 const e = new EngineLoop(canvas);
 e.loop();
 
-canvas.addEventListener("tick", (e) => console.log(e))
+const ctx = canvas.getContext("2d");
+if (!ctx) throw new Error("Canvas context is null");
+
+const board = new Board(ctx);
+console.log(board);
+canvas.addEventListener("tick", (e) => board.hearTickEvent(e));

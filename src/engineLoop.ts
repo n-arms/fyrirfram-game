@@ -1,3 +1,5 @@
+export type TickDetail = { tickCount: number, skippedTicks: number };
+
 export class EngineLoop {
   private lastTick: number;
   private tickCount: number = 0;
