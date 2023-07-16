@@ -1,3 +1,6 @@
+# Bundled js
+lib/
+
 # Logs
 logs
 *.log

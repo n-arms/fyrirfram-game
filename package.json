@@ -1,0 +1,27 @@
+{
+  "name": "fyrirfram-game",
+  "version": "0.0.0",
+  "description": "A perfect information viking themed strategy game",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc & node esbuild.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-arms/fyrirfram-game.git"
+  },
+  "author": "n-arms",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/n-arms/fyrirfram-game/issues"
+  },
+  "homepage": "https://github.com/n-arms/fyrirfram-game#readme",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "esbuild": "0.18.13",
+    "esbuild-node-externals": "1.8.0"
+  }
+}
