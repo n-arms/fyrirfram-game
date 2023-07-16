@@ -113,9 +113,34 @@ export class Board {
     const {x, y} = this.canvasCoords(event.offsetX, event.offsetY);
     const position = this.boardCoords(x, y);
 
-    if (!position) return;
-
     this.focusedSquare = position;
+  }
+
+  hearMouseupEvent(event: Event) {
+    if (!(event instanceof MouseEvent)) throw new Error("Expected mouse event, got " + event);
+
+    if (event.type !== "mouseup") throw new Error("Expected mouseup event");
+
+    const {x, y} = this.canvasCoords(event.offsetX, event.offsetY);
+    const position = this.boardCoords(x, y);
+
+    if (position) {
+      if (this.focusedSquare) {
+        if (position.column === this.focusedSquare.column && position.row === this.focusedSquare.row) {
+          return;
+        } else {
+          const piece = this.findPiece(this.focusedSquare);
+
+          if (!piece) return;
+
+          piece.position = position;
+        }
+      } else {
+        return;
+      }
+    } else {
+      this.focusedSquare = null;
+    }
   }
 
   canvasCoords(offsetX: number, offsetY: number) : {x: number, y: number} {
@@ -135,5 +160,15 @@ export class Board {
     } else {
       return null;
     }
+  }
+
+  findPiece(position: Position) : Piece | null {
+    let targetPiece = null;
+    this.pieces.forEach(piece => {
+      if (piece.position.column === position.column && piece.position.row === position.row) {
+        targetPiece = piece;
+      }
+    });
+    return targetPiece;
   }
 }

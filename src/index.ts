@@ -15,3 +15,4 @@ const board = new Board(ctx);
 console.log(board);
 canvas.addEventListener("tick", (e) => board.hearTickEvent(e));
 canvas.addEventListener("mousedown", e => board.hearMousedownEvent(e));
+canvas.addEventListener("mouseup", e => board.hearMouseupEvent(e));
