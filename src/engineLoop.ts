@@ -20,7 +20,7 @@ export class EngineLoop {
     const now = Date.now();
     const elapsed = now - this.lastTick;
 
-    const elapsedTicks = Math.round(elapsed / this.millisPerTick);
+    const elapsedTicks = Math.floor(elapsed / this.millisPerTick);
 
     this.lastTick += elapsedTicks * this.millisPerTick;
 

@@ -4,12 +4,12 @@ import { Side, BoardIndex, Position, PieceType, Piece } from "./piece.js";
 type Highlight = "selected" | "reachable";
 
 export class Render {
-  private ctx: CanvasRenderingContext2D;
-  private width: number;
-  private height: number;
-  private borderSize: number = 10;
-  private cellSize: number;
-  private innerCellSize: number;
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  borderSize: number = 10;
+  cellSize: number;
+  innerCellSize: number;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -29,7 +29,6 @@ export class Render {
       this.ctx.fillRect(0, x * this.cellSize, this.height, this.borderSize);
     })  
   }
-
 
   drawPiece(piece: Piece) {
     if (piece.pieceType === "pawn") {
@@ -75,6 +74,7 @@ export class Board {
   private ctx: CanvasRenderingContext2D;
   private pieces: Piece[];
   private render: Render;
+  private focusedSquare: Position | null = null;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -90,13 +90,50 @@ export class Board {
     this.render = new Render(ctx);
   }
 
-  hearTickEvent(this: Board ,event: Event) {
+  hearTickEvent(event: Event) {
     if (!("detail" in event)) throw new Error("Expected tick event");
     const detail = <TickDetail> event.detail;
+
+    if (this.focusedSquare) {
+      this.render.highlightSquare(this.focusedSquare, "selected");
+    }
+
     this.render.drawGrid();
 
     this.pieces.forEach(piece => {
       this.render.drawPiece(piece);
     });
+  }
+
+  hearMousedownEvent(event: Event) {
+    if (!(event instanceof MouseEvent)) throw new Error("Expected mouse event, got " + event);
+
+    if (event.type !== "mousedown") throw new Error("Expected mousedown event");
+
+    const {x, y} = this.canvasCoords(event.offsetX, event.offsetY);
+    const position = this.boardCoords(x, y);
+
+    if (!position) return;
+
+    this.focusedSquare = position;
+  }
+
+  canvasCoords(offsetX: number, offsetY: number) : {x: number, y: number} {
+    const scale = this.ctx.canvas.offsetHeight / this.ctx.canvas.height;
+    const x = offsetX / scale;
+    const y = offsetY / scale;
+
+    return {x, y};
+  }
+
+  boardCoords(canvasX: number, canvasY: number) : Position | null {
+    const x = Math.floor(canvasX / this.render.cellSize);
+    const y = Math.floor(canvasY / this.render.cellSize);
+
+    if (0 <= x && x <= 4 && 0 <= y && y <= 4) {
+      return {column: <BoardIndex> x, row: <BoardIndex> y};
+    } else {
+      return null;
+    }
   }
 }

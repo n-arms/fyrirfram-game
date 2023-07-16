@@ -14,3 +14,4 @@ if (!ctx) throw new Error("Canvas context is null");
 const board = new Board(ctx);
 console.log(board);
 canvas.addEventListener("tick", (e) => board.hearTickEvent(e));
+canvas.addEventListener("mousedown", e => board.hearMousedownEvent(e));
