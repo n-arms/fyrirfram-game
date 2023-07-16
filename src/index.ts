@@ -1,5 +1,6 @@
 import { Board } from "./board.js";
 import { EngineLoop } from "./engineLoop.js";
+import { Input, Render } from "./io.js";
 
 const canvas = document.getElementById("game-canvas");
 
@@ -11,8 +12,8 @@ e.loop();
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("Canvas context is null");
 
-const board = new Board(ctx);
-console.log(board);
-canvas.addEventListener("tick", (e) => board.hearTickEvent(e));
-canvas.addEventListener("mousedown", e => board.hearMousedownEvent(e));
-canvas.addEventListener("mouseup", e => board.hearMouseupEvent(e));
+const input = new Input(new Board(), new Render(ctx));
+
+canvas.addEventListener("tick", (e) => input.hearTickEvent(e));
+canvas.addEventListener("mousedown", e => input.hearMousedownEvent(e));
+canvas.addEventListener("mouseup", e => input.hearMouseupEvent(e));
