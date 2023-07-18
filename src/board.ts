@@ -1,4 +1,5 @@
 import { Side, BoardIndex, Position, PieceType, Piece } from "./piece.js";
+import _ from "lodash";
 
 export class Move {
   start: Position;
@@ -10,8 +11,105 @@ export class Move {
   }
 }
 
+export class RelativeMove {
+  
+  column: number;
+  row: number;
+
+  constructor(column: number, row: number) {
+    this.column = column;
+    this.row = row;
+  }
+
+  applyTo(position: Position) : Position | null {
+    const column = position.column + this.column;
+    const row = position.row + this.row;
+
+    if (0 <= column && column <= 4 && 0 <= row && row <= 4) {
+      return { row: <BoardIndex> row, column: <BoardIndex> column };
+    } else {
+      return null;
+    }
+  }
+
+  flip() : RelativeMove {
+    return new RelativeMove(4 - this.column, 4 - this.row);
+  }
+}
+
+export class Card {
+  name: string;
+  relativeMoves: RelativeMove[];
+
+  constructor(name: string, relativeMoves: RelativeMove[]) {
+    this.name = name;
+    this.relativeMoves = relativeMoves;
+  }
+}
+
+export const cards = [
+  new Card("cat", [new RelativeMove(0, 1), new RelativeMove(0, -1)]),
+  /*
+  new Card("cat", [new RelativeMove(-1, 0), new RelativeMove(1, 0)]),
+  new Card("dog", [new RelativeMove(-2, 1), new RelativeMove(2, 1)]),
+  new Card("fish", [new RelativeMove(-1, 1), new RelativeMove(1, -1)]),
+  new Card("moose", [new RelativeMove(1, 2), new RelativeMove(-1, 2)]),
+  new Card("chipmunk", [new RelativeMove(-1, -1), new RelativeMove(-1, -1)]),
+  */
+];
+
+function get_random<T>(list: T[]) : T | null {
+  if (list.length === 0) return null;
+  const elem = list[Math.floor(Math.random() * list.length)];
+  if (!elem) return null;
+  return elem;
+}
+
+function get_card() : Card {
+  const card = get_random(cards);
+  if (!card) throw new Error("Got null card");
+  return card;
+}
+
+export class Cardpile {
+  cards: [Card, Side | null][];
+
+  constructor() {
+    this.cards = [
+      [get_card(), "red"],
+      [get_card(), "red"],
+      [get_card(), "blue"],
+      [get_card(), "blue"],
+      [get_card(), null],
+    ];
+  }
+
+  moves(piece: Piece) : Position[] {
+    const cards = this.cards
+      .filter(([card, side]) => side === piece.side)
+      .map(([card, side]) => card);
+
+    let moves : Position[] = [];
+
+    cards.forEach(card => {
+      card.relativeMoves.forEach(relativeMove => {
+        if (piece.side === "blue") {
+          relativeMove = relativeMove.flip();
+        }
+        const move = relativeMove.applyTo(piece.position);
+        if (move) {
+          moves.push(move);
+        }
+      })
+    });
+
+    return moves;
+  }
+}
+
 export class Board {
   pieces: Piece[];
+  cardpile: Cardpile;
 
   constructor() {
     this.pieces = [];
@@ -22,14 +120,20 @@ export class Board {
     });
     this.pieces.push(new Piece("red", {column: 2, row: 0}, "king"));
     this.pieces.push(new Piece("blue", {column: 2, row: 4}, "king"));
+    this.cardpile = new Cardpile();
   }
 
   moveIsValid(move: Move) : boolean {
     const piece = this.findPiece(move.start);
+    const capturing = this.findPiece(move.end);
 
     if (!piece) return false;
 
-    return true; // TODO
+    if (_.some(this.cardpile.moves(piece), move.end)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   findPiece(position: Position) : Piece | null {

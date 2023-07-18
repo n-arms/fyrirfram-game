@@ -18,10 +18,12 @@
   },
   "homepage": "https://github.com/n-arms/fyrirfram-game#readme",
   "devDependencies": {
+    "@types/lodash": "^4.14.195",
     "typescript": "^5.1.6"
   },
   "dependencies": {
     "esbuild": "0.18.13",
-    "esbuild-node-externals": "1.8.0"
+    "esbuild-node-externals": "1.8.0",
+    "lodash": "^4.17.21"
   }
 }

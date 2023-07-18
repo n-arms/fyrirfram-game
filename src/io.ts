@@ -23,7 +23,6 @@ export class Render {
 
   drawGrid() {
     this.ctx.fillStyle = "#000";
-    this.ctx.strokeStyle = "#000";
 
     [0, 1, 2, 3, 4, 5].forEach(x => {
       this.ctx.fillRect(x * this.cellSize, 0, this.borderSize, this.height);
@@ -32,6 +31,12 @@ export class Render {
   }
 
   drawPiece(piece: Piece) {
+    if (piece.side == "red") {
+      this.ctx.fillStyle = "red";
+    } else {
+      this.ctx.fillStyle = "blue";
+    }
+
     if (piece.pieceType === "pawn") {
     this.ctx.beginPath();
       this.ctx.arc(
@@ -68,7 +73,6 @@ export class Render {
       this.innerCellSize,
       this.innerCellSize
     );
-    this.ctx.fillStyle = "#000";
   }
 
   drawBoard(input: Input) {
