@@ -83,6 +83,8 @@ export class Render {
     const n = cardpile.neutralCard();
     const startX = this.height;
 
+    this.drawCardBoard(n, null, side, startX + (this.height / 4 + this.height / 16) / 2, this.height / 3 + this.height / 24);
+
     if (side === "red") {
       this.ctx.fillStyle = "blue";
       this.ctx.fillRect(this.height, 0, this.height / 2 + this.height / 16, this.height / 3);
