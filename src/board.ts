@@ -48,13 +48,10 @@ export class Card {
 
 export const cards = [
   new Card("cat", [new RelativeMove(0, 2), new RelativeMove(0, -1)]),
-  /*
-  new Card("cat", [new RelativeMove(-1, 0), new RelativeMove(1, 0)]),
-  new Card("dog", [new RelativeMove(-2, 1), new RelativeMove(2, 1)]),
+  new Card("dog", [new RelativeMove(-2, 1), new RelativeMove(1, 1)]),
   new Card("fish", [new RelativeMove(-1, 1), new RelativeMove(1, -1)]),
   new Card("moose", [new RelativeMove(1, 2), new RelativeMove(-1, 2)]),
   new Card("chipmunk", [new RelativeMove(-1, -1), new RelativeMove(-1, -1)]),
-  */
 ];
 
 function get_random<T>(list: T[]) : T | null {

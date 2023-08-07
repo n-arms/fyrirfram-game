@@ -1,6 +1,6 @@
 import { Board, Card, Cardpile, Move } from "./board.js";
 import { TickDetail } from "./engineLoop.js";
-import { Side, BoardIndex, Position, PieceType, Piece, rotatePosition } from "./piece.js";
+import { Side, BoardIndex, Position, PieceType, Piece, rotatePosition, CardIndex } from "./piece.js";
 
 export type Highlight = "selected" | "reachable";
 
@@ -72,6 +72,24 @@ export class Render {
       this.borderSize + this.cellSize * position.row,
       this.innerCellSize,
       this.innerCellSize
+    );
+  }
+
+  highlightCard(cardSide: Side, playingSide: Side, card: CardIndex) {
+    let startX;
+    let startY;
+
+    if (cardSide === playingSide) {
+      startY = this.height * 2 / 3;
+    } else {
+      startY = 0;
+    }
+
+    startX = this.height + this.height / 4 + this.height / 32 * card;
+
+    this.ctx.fillStyle = "yellow";
+    this.ctx.fillRect(
+      startX, startY, this.height / 32, this.height / 3
     );
   }
 
@@ -192,6 +210,7 @@ export class Render {
 export class Input {
   private render: Render;
   focusedSquare: Position | null = null;
+  focusedCard: CardIndex | null = null;
   board: Board;
   private ctx: CanvasRenderingContext2D;
 
@@ -211,6 +230,8 @@ export class Input {
 
     this.render.drawBoard(this);
     this.render.drawCards(this.board.cardpile, "blue");
+    if (this.focusedCard !== null)
+      this.render.highlightCard("blue", "blue", this.focusedCard);
   }
 
   hearMousedownEvent(event: Event) {
@@ -220,17 +241,23 @@ export class Input {
 
     const {x, y} = this.canvasCoords(event.offsetX, event.offsetY);
     const position = this.boardCoords(x, y);
+    const card = this.cardCoords(x, y);
 
-    if (!position) return;
 
-    if (this.focusedSquare) {
-      const move = new Move(this.focusedSquare, position);
-      if (this.board.moveIsValid(move)) {
-        this.board.playMove(move);
+    if (card !== null) {
+      this.focusedCard = card;
+    }
+
+    if (position) {
+      if (this.focusedSquare) {
+        const move = new Move(this.focusedSquare, position);
+        if (this.board.moveIsValid(move)) {
+          this.board.playMove(move);
+        }
+        this.focusedSquare = null;
+      } else {
+        this.focusedSquare = position;
       }
-      this.focusedSquare = null;
-    } else {
-      this.focusedSquare = position;
     }
   }
 
@@ -278,4 +305,20 @@ export class Input {
     } else {
       return null;
     }
-  }}
+  }
+
+  cardCoords(canvasX: number, canvasY: number) : CardIndex | null {
+    const height = this.render.height;
+    if (canvasY > height || canvasY < 2 * height / 3) {
+      return null;
+    }
+    const x = Math.floor((canvasX - height) / (height / 4 + height / 32));
+
+
+    if (0 <= x && x <= 1) {
+      return <CardIndex> x;
+    } else {
+      return null;
+    }
+  }
+}

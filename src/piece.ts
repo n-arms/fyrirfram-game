@@ -1,5 +1,6 @@
 export type Side = "red" | "blue";
 export type BoardIndex = 0 | 1 | 2 | 3 | 4;
+export type CardIndex = 0 | 1;
 export type Position = { row: BoardIndex, column: BoardIndex };
 export type PieceType = "pawn" | "king";
 
