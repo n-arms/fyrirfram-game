@@ -1,4 +1,4 @@
-import { Side, BoardIndex, Position, Piece } from "./piece.js";
+import { Side, BoardIndex, Position, Piece, CardIndex } from "./piece.js";
 import _ from "lodash";
 
 export class Move {
@@ -32,7 +32,7 @@ export class RelativeMove {
   }
 
   flip() : RelativeMove {
-    return new RelativeMove(this.column, -this.row);
+    return new RelativeMove(-this.column, -this.row);
   }
 }
 
@@ -173,5 +173,14 @@ export class Board {
     if (piece) {
       piece.position = move.end;
     }
+  }
+
+  validMoves(focusedSquare: Position, focusedCard: CardIndex, side: Side): Position[] {
+    const moves: Position[] = [];
+    this.cardpile.sideCards(side)[focusedCard].relativeMoves.forEach(relativeMove => {
+      const move = ((side === "blue") ? relativeMove.flip() : relativeMove).applyTo(focusedSquare);
+      if (move) moves.push(move);
+    });
+    return moves;
   }
 }

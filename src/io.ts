@@ -203,6 +203,9 @@ export class Render {
     if (input.focusedSquare) {
       this.highlightSquare(input.focusedSquare, "selected");
     }
+    input.moves().forEach(move => {
+      this.highlightSquare(move, "reachable");
+    })
     input.board.pieces.forEach(piece => this.drawPiece(piece));
   }
 }
@@ -212,6 +215,7 @@ export class Input {
   focusedSquare: Position | null = null;
   focusedCard: CardIndex | null = null;
   board: Board;
+  side: Side = "blue";
   private ctx: CanvasRenderingContext2D;
 
   constructor(board: Board, render: Render) {
@@ -229,9 +233,9 @@ export class Input {
     }
 
     this.render.drawBoard(this);
-    this.render.drawCards(this.board.cardpile, "blue");
+    this.render.drawCards(this.board.cardpile, this.side);
     if (this.focusedCard !== null)
-      this.render.highlightCard("blue", "blue", this.focusedCard);
+      this.render.highlightCard(this.side, this.side, this.focusedCard);
   }
 
   hearMousedownEvent(event: Event) {
@@ -320,5 +324,11 @@ export class Input {
     } else {
       return null;
     }
+  }
+
+  moves() : Position[] {
+    if (!this.focusedSquare || this.focusedCard === null) return [];
+
+    return this.board.validMoves(this.focusedSquare, this.focusedCard, this.side);
   }
 }
