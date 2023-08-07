@@ -22,3 +22,12 @@ export function rotatePosition(position: Position, rotations: number) : Position
   }
   return position;
 }
+
+export function sideOpponent(side: Side) : Side {
+  switch (side) {
+    case "red":
+      return "blue";
+    case "blue":
+      return "red";
+  }
+}

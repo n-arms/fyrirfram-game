@@ -1,6 +1,6 @@
 import { Board, Card, Cardpile, Move } from "./board.js";
 import { TickDetail } from "./engineLoop.js";
-import { Side, BoardIndex, Position, PieceType, Piece, rotatePosition, CardIndex } from "./piece.js";
+import { Side, BoardIndex, Position, PieceType, Piece, rotatePosition, CardIndex, sideOpponent } from "./piece.js";
 
 export type Highlight = "selected" | "reachable";
 
@@ -30,18 +30,26 @@ export class Render {
     })  
   }
 
-  drawPiece(piece: Piece) {
+  drawPiece(piece: Piece, isFlipped: boolean) {
     if (piece.side == "red") {
       this.ctx.fillStyle = "red";
     } else {
       this.ctx.fillStyle = "blue";
     }
 
+    let position;
+
+    if (isFlipped) {
+      position = rotatePosition(piece.position, 2);
+    } else {
+      position = piece.position;
+    }
+
     if (piece.pieceType === "pawn") {
     this.ctx.beginPath();
       this.ctx.arc(
-        this.borderSize + this.innerCellSize / 2 + this.cellSize * piece.position.column, 
-        this.borderSize + this.innerCellSize / 2 + this.cellSize * piece.position.row,
+        this.borderSize + this.innerCellSize / 2 + this.cellSize * position.column, 
+        this.borderSize + this.innerCellSize / 2 + this.cellSize * position.row,
         this.innerCellSize / 3,
         0,
         2 * Math.PI
@@ -50,15 +58,15 @@ export class Render {
       
     } else {
       this.ctx.fillRect(
-        this.borderSize + this.innerCellSize / 6 + this.cellSize * piece.position.column,
-        this.borderSize + this.innerCellSize / 6 + this.cellSize * piece.position.row,
+        this.borderSize + this.innerCellSize / 6 + this.cellSize * position.column,
+        this.borderSize + this.innerCellSize / 6 + this.cellSize * position.row,
         this.innerCellSize * 2 / 3,
         this.innerCellSize * 2 / 3
       );
     }
   }
 
-  highlightSquare(position: Position, highlight: Highlight) {
+  highlightSquare(position: Position, highlight: Highlight, isFlipped: boolean) {
     switch (highlight) {
       case "selected":
         this.ctx.fillStyle = "yellow";
@@ -66,6 +74,9 @@ export class Render {
       case "reachable":
         this.ctx.fillStyle = "#4fb3ff";
         break;
+    }
+    if (isFlipped) {
+      position = rotatePosition(position, 2);
     }
     this.ctx.fillRect(
       this.borderSize + this.cellSize * position.column,
@@ -201,12 +212,12 @@ export class Render {
   drawBoard(input: Input) {
     this.drawGrid();
     if (input.focusedSquare) {
-      this.highlightSquare(input.focusedSquare, "selected");
+      this.highlightSquare(input.focusedSquare, "selected", input.side === "red");
     }
     input.moves().forEach(move => {
-      this.highlightSquare(move, "reachable");
+      this.highlightSquare(move, "reachable", input.side === "red");
     })
-    input.board.pieces.forEach(piece => this.drawPiece(piece));
+    input.board.pieces.forEach(piece => this.drawPiece(piece, input.side === "red"));
   }
 }
 
@@ -229,7 +240,7 @@ export class Input {
     const detail = <TickDetail> event.detail;
 
     if (this.focusedSquare) {
-      this.render.highlightSquare(this.focusedSquare, "selected");
+      this.render.highlightSquare(this.focusedSquare, "selected", this.side === "red");
     }
 
     this.render.drawBoard(this);
@@ -257,6 +268,7 @@ export class Input {
         const move = new Move(this.focusedSquare, position);
         if (this.board.moveIsValid(move)) {
           this.board.playMove(move);
+          this.side = sideOpponent(this.side);
         }
         this.focusedSquare = null;
       } else {
@@ -281,6 +293,7 @@ export class Input {
           const move = new Move(this.focusedSquare, position);
           if (this.board.moveIsValid(move)) {
             this.board.playMove(move);
+            this.side = sideOpponent(this.side);
           }
           this.focusedSquare = null;
         }
@@ -305,7 +318,9 @@ export class Input {
     const y = Math.floor(canvasY / this.render.cellSize);
 
     if (0 <= x && x <= 4 && 0 <= y && y <= 4) {
-      return {column: <BoardIndex> x, row: <BoardIndex> y};
+      const position = {column: <BoardIndex> x, row: <BoardIndex> y};
+      if (this.side === "blue") return position;
+      else return rotatePosition(position, 2)
     } else {
       return null;
     }

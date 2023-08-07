@@ -1,4 +1,4 @@
-import { Side, BoardIndex, Position, Piece, CardIndex } from "./piece.js";
+import { Side, BoardIndex, Position, Piece, CardIndex, sideOpponent } from "./piece.js";
 import _ from "lodash";
 
 export class Move {
@@ -131,6 +131,7 @@ export class Cardpile {
 export class Board {
   pieces: Piece[];
   cardpile: Cardpile;
+  side: Side = "blue";
 
   constructor() {
     this.pieces = [];
@@ -149,6 +150,7 @@ export class Board {
     const capturing = this.findPiece(move.end);
 
     if (!piece) return false;
+    if (piece.side !== this.side) return false;
 
     if (_.some(this.cardpile.moves(piece), move.end)) {
       return true;
@@ -169,6 +171,7 @@ export class Board {
 
   playMove(move: Move) {
     const piece = this.findPiece(move.start);
+    this.side = sideOpponent(this.side);
 
     if (piece) {
       piece.position = move.end;
