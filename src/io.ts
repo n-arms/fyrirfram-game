@@ -1,6 +1,6 @@
-import { Board, Move } from "./board.js";
+import { Board, Card, Cardpile, Move } from "./board.js";
 import { TickDetail } from "./engineLoop.js";
-import { Side, BoardIndex, Position, PieceType, Piece } from "./piece.js";
+import { Side, BoardIndex, Position, PieceType, Piece, rotatePosition } from "./piece.js";
 
 export type Highlight = "selected" | "reachable";
 
@@ -64,7 +64,7 @@ export class Render {
         this.ctx.fillStyle = "yellow";
         break;
       case "reachable":
-        this.ctx.fillStyle = "blue";
+        this.ctx.fillStyle = "#4fb3ff";
         break;
     }
     this.ctx.fillRect(
@@ -73,6 +73,109 @@ export class Render {
       this.innerCellSize,
       this.innerCellSize
     );
+  }
+
+  drawCards(cardpile: Cardpile, side: Side) {
+    //this.drawCardBoard(cardpile.neutralCard(), "red", this.height, 0);
+
+    const [r1, r2] = cardpile.sideCards("red");
+    const [b1, b2] = cardpile.sideCards("blue");
+    const n = cardpile.neutralCard();
+    const startX = this.height;
+
+    if (side === "red") {
+      this.ctx.fillStyle = "blue";
+      this.ctx.fillRect(this.height, 0, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillStyle = "red";
+      this.ctx.fillRect(this.height, 2 * this.height / 3, this.height / 2 + this.height / 16, this.height / 3);
+
+      this.drawCardBoard(r1, "red", side, startX, 2 * this.height / 3 + this.height / 24);
+      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height / 16, 2 * this.height / 3 + this.height / 24);
+
+      this.drawCardBoard(b1, "blue", side, startX, this.height / 24);
+      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height / 16, this.height / 24);
+    } else {
+      this.ctx.fillStyle = "red";
+      this.ctx.fillRect(this.height, 0, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillStyle = "blue";
+      this.ctx.fillRect(this.height, 2 * this.height / 3, this.height / 2 + this.height / 16, this.height / 3);
+
+      this.drawCardBoard(b1, "blue", side, startX, 2 * this.height / 3 + this.height / 24);
+      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height / 16, 2 * this.height / 3 + this.height / 24);    }
+
+      this.drawCardBoard(r1, "red", side, startX, this.height / 24);
+      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height / 16, this.height / 24);
+  }
+
+  drawCardBoard(card: Card, cardSide: Side | null, playingSide: Side, startX: number, startY: number) {
+    const cellSize = this.cellSize / 4;
+    const borderSize = this.borderSize / 4;
+    const size = cellSize * 5 + borderSize;
+    const innerCellSize = cellSize - borderSize;
+
+    this.ctx.fillStyle = "black";
+
+    [0, 1, 2, 3, 4, 5].forEach(x => {
+      this.ctx.fillRect(startX + x * cellSize, startY, borderSize, size);
+      this.ctx.fillRect(startX, startY + x * cellSize, size, borderSize);
+    });
+
+    this.ctx.fillStyle = "yellow";
+    this.ctx.fillRect(
+      startX + borderSize + cellSize * 2,
+      startY + borderSize + cellSize * 2,
+      innerCellSize,
+      innerCellSize
+    );
+
+    let rotations: number;
+    const sideBoxY = startY + borderSize + cellSize * 2;
+    const sideBoxX = startX + borderSize + cellSize * 2;
+
+    if (cardSide === null) {
+      this.ctx.fillStyle = "blue";
+      this.ctx.fillRect(startX, sideBoxY, cellSize / 4, innerCellSize);
+
+      this.ctx.fillStyle = "red";
+      this.ctx.fillRect(startX + size - cellSize / 4, sideBoxY, cellSize / 4, innerCellSize);
+
+      rotations = 1;
+    } else {
+      switch (playingSide) {
+        case "red":
+          this.ctx.fillStyle = "blue";
+          this.ctx.fillRect(sideBoxX, startY, innerCellSize, cellSize / 4);
+
+          this.ctx.fillStyle = "red";
+          this.ctx.fillRect(sideBoxX, startY + size - cellSize / 4, innerCellSize, cellSize / 4);
+          break;
+        case "blue":
+          this.ctx.fillStyle = "red";
+          this.ctx.fillRect(sideBoxX, startY, innerCellSize, cellSize / 4);
+
+          this.ctx.fillStyle = "blue";
+          this.ctx.fillRect(sideBoxX, startY + size - cellSize / 4, innerCellSize, cellSize / 4);
+          break;
+      }
+
+      if (cardSide === playingSide) {
+        rotations = 2;
+      } else {
+        rotations = 0;
+      }
+    }
+
+    this.ctx.fillStyle = "#4fb3ff";
+    card.relativeMoves.forEach(relativeMove => {
+      let move = relativeMove.applyTo({row: 2, column: 2});
+
+      if (!move) throw new Error("Illegal move");
+
+      move = rotatePosition(move, rotations);
+      
+      this.ctx.fillRect(startX + borderSize + cellSize * move.column,
+      startY + borderSize + cellSize * move.row, innerCellSize, innerCellSize);
+    });
   }
 
   drawBoard(input: Input) {
@@ -105,6 +208,7 @@ export class Input {
     }
 
     this.render.drawBoard(this);
+    this.render.drawCards(this.board.cardpile, "blue");
   }
 
   hearMousedownEvent(event: Event) {

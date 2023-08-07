@@ -1,4 +1,4 @@
-import { Side, BoardIndex, Position, PieceType, Piece } from "./piece.js";
+import { Side, BoardIndex, Position, Piece } from "./piece.js";
 import _ from "lodash";
 
 export class Move {
@@ -12,7 +12,6 @@ export class Move {
 }
 
 export class RelativeMove {
-  
   column: number;
   row: number;
 
@@ -33,7 +32,7 @@ export class RelativeMove {
   }
 
   flip() : RelativeMove {
-    return new RelativeMove(4 - this.column, 4 - this.row);
+    return new RelativeMove(this.column, -this.row);
   }
 }
 
@@ -48,7 +47,7 @@ export class Card {
 }
 
 export const cards = [
-  new Card("cat", [new RelativeMove(0, 1), new RelativeMove(0, -1)]),
+  new Card("cat", [new RelativeMove(0, 2), new RelativeMove(0, -1)]),
   /*
   new Card("cat", [new RelativeMove(-1, 0), new RelativeMove(1, 0)]),
   new Card("dog", [new RelativeMove(-2, 1), new RelativeMove(2, 1)]),
@@ -92,11 +91,11 @@ export class Cardpile {
     let moves : Position[] = [];
 
     cards.forEach(card => {
-      card.relativeMoves.forEach(relativeMove => {
+     card.relativeMoves.forEach(relativeMove => {
         if (piece.side === "blue") {
-          relativeMove = relativeMove.flip();
+         relativeMove = relativeMove.flip();
         }
-        const move = relativeMove.applyTo(piece.position);
+       const move = relativeMove.applyTo(piece.position);
         if (move) {
           moves.push(move);
         }
@@ -104,6 +103,31 @@ export class Cardpile {
     });
 
     return moves;
+  }
+
+  sideCards(side: Side) : [Card, Card] {
+    const cards: Card[] = [];
+
+    this.cards.forEach(([card, cardSide]) => {
+      if (cardSide === side) {
+        cards.push(card);
+      }
+    });
+
+    if (cards.length != 2) throw new Error("Incorrect number of cards in cardpile");
+
+    return <[Card, Card]> cards;
+  }
+
+  neutralCard() : Card {
+    let targetCard : null | Card = null;
+    this.cards.forEach(([card, side]) => {
+      if (!side) {
+        targetCard = card;
+      }
+    });
+    if (!targetCard) throw new Error("No neutral card in cardpile");
+    return targetCard;
   }
 }
 

@@ -14,3 +14,10 @@ export class Piece {
     this.pieceType = pieceType;
   }
 }
+
+export function rotatePosition(position: Position, rotations: number) : Position {
+  for (let i = 0; i < rotations; i++) {
+    position = {row: position.column, column: <BoardIndex> (4 - position.row)};
+  }
+  return position;
+}
