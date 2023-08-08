@@ -142,6 +142,7 @@ export class Board {
 
     if (!piece) return false;
     if (piece.side !== this.side) return false;
+    if (capturing && capturing.side === piece.side) return false;
 
     if (_.some(this.cardpile.moves(piece), move.end)) {
       return true;
@@ -160,12 +161,22 @@ export class Board {
     return targetPiece;
   }
 
+  removePiece(position: Position) {
+    this.pieces = this.pieces.filter(piece => (piece.position.column !== position.column || piece.position.row !== position.row));
+  }
+
   playMove(move: Move, card: CardIndex) {
     const piece = this.findPiece(move.start);
     this.cardpile.useCard(card, this.side);
     this.side = sideOpponent(this.side);
 
     if (piece) {
+      const capturing = this.findPiece(move.end);
+
+      if (capturing) {
+        this.removePiece(capturing.position);
+      }
+      
       piece.position = move.end;
     }
   }
