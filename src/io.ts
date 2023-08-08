@@ -109,7 +109,7 @@ export class Render {
 
     const [r1, r2] = cardpile.sideCards("red");
     const [b1, b2] = cardpile.sideCards("blue");
-    const n = cardpile.neutralCard();
+    const n = cardpile.neutralCard;
     const startX = this.height;
 
     this.drawCardBoard(n, null, side, startX + (this.height / 4 + this.height / 16) / 2, this.height / 3 + this.height / 24);
@@ -264,10 +264,10 @@ export class Input {
     }
 
     if (position) {
-      if (this.focusedSquare) {
+      if (this.focusedSquare && this.focusedCard !== null) {
         const move = new Move(this.focusedSquare, position);
         if (this.board.moveIsValid(move)) {
-          this.board.playMove(move);
+          this.board.playMove(move, this.focusedCard);
           this.side = sideOpponent(this.side);
         }
         this.focusedSquare = null;
@@ -286,13 +286,13 @@ export class Input {
     const position = this.boardCoords(x, y);
 
     if (position) {
-      if (this.focusedSquare) {
+      if (this.focusedSquare && this.focusedCard !== null) {
         if (position.column === this.focusedSquare.column && position.row === this.focusedSquare.row) {
           return;
         } else {
           const move = new Move(this.focusedSquare, position);
           if (this.board.moveIsValid(move)) {
-            this.board.playMove(move);
+            this.board.playMove(move, this.focusedCard);
             this.side = sideOpponent(this.side);
           }
           this.focusedSquare = null;

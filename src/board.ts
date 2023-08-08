@@ -68,22 +68,24 @@ function get_card() : Card {
 }
 
 export class Cardpile {
-  cards: [Card, Side | null][];
+  redCards: [Card, Card];
+  blueCards: [Card, Card];
+  neutralCard: Card;
 
   constructor() {
-    this.cards = [
-      [get_card(), "red"],
-      [get_card(), "red"],
-      [get_card(), "blue"],
-      [get_card(), "blue"],
-      [get_card(), null],
-    ];
+    this.redCards = [get_card(), get_card()];
+    this.blueCards = [get_card(), get_card()];
+    this.neutralCard = get_card();
   }
 
   moves(piece: Piece) : Position[] {
-    const cards = this.cards
-      .filter(([card, side]) => side === piece.side)
-      .map(([card, side]) => card);
+    let cards;
+
+    if (piece.side === "red") {
+      cards = this.redCards;
+    } else {
+      cards = this.blueCards;
+    }
 
     let moves : Position[] = [];
 
@@ -103,28 +105,17 @@ export class Cardpile {
   }
 
   sideCards(side: Side) : [Card, Card] {
-    const cards: Card[] = [];
-
-    this.cards.forEach(([card, cardSide]) => {
-      if (cardSide === side) {
-        cards.push(card);
-      }
-    });
-
-    if (cards.length != 2) throw new Error("Incorrect number of cards in cardpile");
-
-    return <[Card, Card]> cards;
+    if (side === "red") {
+      return this.redCards;
+    } else {
+      return this.blueCards;
+    }
   }
 
-  neutralCard() : Card {
-    let targetCard : null | Card = null;
-    this.cards.forEach(([card, side]) => {
-      if (!side) {
-        targetCard = card;
-      }
-    });
-    if (!targetCard) throw new Error("No neutral card in cardpile");
-    return targetCard;
+  useCard(card: CardIndex, side: Side) {
+    const temp = this.sideCards(side)[card];
+    this.sideCards(side)[card] = this.neutralCard;
+    this.neutralCard = temp;
   }
 }
 
@@ -169,8 +160,9 @@ export class Board {
     return targetPiece;
   }
 
-  playMove(move: Move) {
+  playMove(move: Move, card: CardIndex) {
     const piece = this.findPiece(move.start);
+    this.cardpile.useCard(card, this.side);
     this.side = sideOpponent(this.side);
 
     if (piece) {
