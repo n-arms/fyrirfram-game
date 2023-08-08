@@ -247,6 +247,12 @@ export class Input {
     this.render.drawCards(this.board.cardpile, this.side);
     if (this.focusedCard !== null)
       this.render.highlightCard(this.side, this.side, this.focusedCard);
+
+    const winner = this.board.gameWon();
+
+    if (winner) {
+      alert(`${winner} has won`)
+    }
   }
 
   hearMousedownEvent(event: Event) {
@@ -271,7 +277,7 @@ export class Input {
           this.side = sideOpponent(this.side);
         }
         this.focusedSquare = null;
-      } else {
+      } else if (this.board.findPiece(position)?.side === this.side) {
         this.focusedSquare = position;
       }
     }

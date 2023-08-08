@@ -47,24 +47,37 @@ export class Card {
 }
 
 export const cards = [
-  new Card("cat", [new RelativeMove(0, 2), new RelativeMove(0, -1)]),
-  new Card("dog", [new RelativeMove(-2, 1), new RelativeMove(1, 1)]),
-  new Card("fish", [new RelativeMove(-1, 1), new RelativeMove(1, -1)]),
-  new Card("moose", [new RelativeMove(1, 2), new RelativeMove(-1, 2)]),
-  new Card("chipmunk", [new RelativeMove(-1, -1), new RelativeMove(-1, -1)]),
+  new Card("monkey", [new RelativeMove(-1, -1), new RelativeMove(-1, 1), new RelativeMove(1, 1), new RelativeMove(1, -1)]),
+  new Card("tiger", [new RelativeMove(0, 2), new RelativeMove(0, -1)]),
+  new Card("boar", [new RelativeMove(-1, 0), new RelativeMove(0, 1), new RelativeMove(1, 0)]),
+  new Card("mantis", [new RelativeMove(1, 1), new RelativeMove(-1, 1), new RelativeMove(0, -1)]),
+  new Card("dragon", [new RelativeMove(2, 1), new RelativeMove(-2, 1), new RelativeMove(-1, -1), new RelativeMove(1, -1)]),
+  new Card("crane", [new RelativeMove(1, -1), new RelativeMove(-1, -1), new RelativeMove(0, 1)]),
+  new Card("crab", [new RelativeMove(2, -1), new RelativeMove(-2, -1), new RelativeMove(0, 1)]),
 ];
 
-function get_random<T>(list: T[]) : T | null {
-  if (list.length === 0) return null;
-  const elem = list[Math.floor(Math.random() * list.length)];
-  if (!elem) return null;
-  return elem;
-}
+export class DrawPile {
+  cards: Card[];
 
-function get_card() : Card {
-  const card = get_random(cards);
-  if (!card) throw new Error("Got null card");
-  return card;
+  constructor() {
+    this.cards = [
+      new Card("monkey", [new RelativeMove(-1, -1), new RelativeMove(-1, 1), new RelativeMove(1, 1), new RelativeMove(1, -1)]),
+      new Card("tiger", [new RelativeMove(0, 2), new RelativeMove(0, -1)]),
+      new Card("boar", [new RelativeMove(-1, 0), new RelativeMove(0, 1), new RelativeMove(1, 0)]),
+      new Card("mantis", [new RelativeMove(1, 1), new RelativeMove(-1, 1), new RelativeMove(0, -1)]),
+      new Card("dragon", [new RelativeMove(2, 1), new RelativeMove(-2, 1), new RelativeMove(-1, -1), new RelativeMove(1, -1)]),
+      new Card("crane", [new RelativeMove(1, -1), new RelativeMove(-1, -1), new RelativeMove(0, 1)]),
+      new Card("crab", [new RelativeMove(2, -1), new RelativeMove(-2, -1), new RelativeMove(0, 1)]),
+    ];
+  }
+
+  draw() : Card {
+    if (this.cards.length === 0) throw new Error("Drawpile was empty");
+    const index = Math.floor(Math.random() * this.cards.length);
+    const card = <Card> this.cards[index];
+    this.cards.splice(index, 1);
+    return card;
+  }
 }
 
 export class Cardpile {
@@ -73,9 +86,10 @@ export class Cardpile {
   neutralCard: Card;
 
   constructor() {
-    this.redCards = [get_card(), get_card()];
-    this.blueCards = [get_card(), get_card()];
-    this.neutralCard = get_card();
+    const drawPile = new DrawPile();
+    this.redCards = [drawPile.draw(), drawPile.draw()];
+    this.blueCards = [drawPile.draw(), drawPile.draw()];
+    this.neutralCard = drawPile.draw();
   }
 
   moves(piece: Piece) : Position[] {
@@ -188,5 +202,21 @@ export class Board {
       if (move) moves.push(move);
     });
     return moves;
+  }
+
+  gameWon(): Side | null {
+    let redKing = false;
+    let blueKing = false;
+
+    this.pieces.forEach(piece => {
+      if (piece.pieceType === "king") {
+        if (piece.side === "blue") blueKing = true;
+        else redKing = true;
+      }
+    });
+
+    if (!redKing) return "blue";
+    if (!blueKing) return "red";
+    return null;
   }
 }
