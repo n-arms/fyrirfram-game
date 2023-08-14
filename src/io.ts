@@ -96,12 +96,17 @@ export class Render {
       startY = 0;
     }
 
-    startX = this.height + this.height / 4 + this.height / 32 * card;
+    startX = this.height + (this.height / 4 + this.height * 2 / 24) * card;
 
     this.ctx.fillStyle = "yellow";
     this.ctx.fillRect(
-      startX, startY, this.height / 32, this.height / 3
+      startX, startY, this.height / 24, this.height / 3
     );
+    this.ctx.fillRect(
+      startX + this.height / 24 + this.height / 4, startY, this.height / 24, this.height / 3
+    );
+    this.ctx.fillRect(startX, startY, this.height / 3, this.height / 24);
+    this.ctx.fillRect(startX, startY + this.height / 24 + this.height / 4, this.height / 3, this.height / 24);
   }
 
   drawCards(cardpile: Cardpile, side: Side) {
@@ -112,30 +117,33 @@ export class Render {
     const n = cardpile.neutralCard;
     const startX = this.height;
 
-    this.drawCardBoard(n, null, side, startX + (this.height / 4 + this.height / 16) / 2, this.height / 3 + this.height / 24);
+    const pannelWidth = this.height * (1/24 + 1/4 + 2/24 + 1/4 + 1/24);
+
+    this.drawCardBoard(n, null, side, startX + (pannelWidth - this.height / 4) / 2, this.height / 3 + this.height / 24);
+
 
     if (side === "red") {
       this.ctx.fillStyle = "blue";
-      this.ctx.fillRect(this.height, 0, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillRect(this.height, 0, pannelWidth, this.height / 3);
       this.ctx.fillStyle = "red";
-      this.ctx.fillRect(this.height, 2 * this.height / 3, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillRect(this.height, 2 * this.height / 3, pannelWidth, this.height / 3);
 
-      this.drawCardBoard(r1, "red", side, startX, 2 * this.height / 3 + this.height / 24);
-      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height / 16, 2 * this.height / 3 + this.height / 24);
+      this.drawCardBoard(r1, "red", side, startX + this.height / 24, 2 * this.height / 3 + this.height / 24);
+      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height * 3 / 24, 2 * this.height / 3 + this.height / 24);
 
-      this.drawCardBoard(b1, "blue", side, startX, this.height / 24);
-      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height / 16, this.height / 24);
+      this.drawCardBoard(b1, "blue", side, startX + this.height / 24, this.height / 24);
+      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height * 3 / 24, this.height / 24);
     } else {
       this.ctx.fillStyle = "red";
-      this.ctx.fillRect(this.height, 0, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillRect(this.height, 0, pannelWidth, this.height / 3);
       this.ctx.fillStyle = "blue";
-      this.ctx.fillRect(this.height, 2 * this.height / 3, this.height / 2 + this.height / 16, this.height / 3);
+      this.ctx.fillRect(this.height, 2 * this.height / 3, pannelWidth, this.height / 3);
 
-      this.drawCardBoard(b1, "blue", side, startX, 2 * this.height / 3 + this.height / 24);
-      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height / 16, 2 * this.height / 3 + this.height / 24);    }
+      this.drawCardBoard(b1, "blue", side, startX + this.height / 24, 2 * this.height / 3 + this.height / 24);
+      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height * 3 / 24, 2 * this.height / 3 + this.height / 24);    }
 
-      this.drawCardBoard(r1, "red", side, startX, this.height / 24);
-      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height / 16, this.height / 24);
+      this.drawCardBoard(r1, "red", side, startX + this.height / 24, this.height / 24);
+      this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height * 3 / 24, this.height / 24);
   }
 
   drawCardBoard(card: Card, cardSide: Side | null, playingSide: Side, startX: number, startY: number) {
@@ -337,7 +345,7 @@ export class Input {
     if (canvasY > height || canvasY < 2 * height / 3) {
       return null;
     }
-    const x = Math.floor((canvasX - height) / (height / 4 + height / 32));
+    const x = Math.floor((canvasX - height) / (height / 4 + height / 12));
 
 
     if (0 <= x && x <= 1) {
