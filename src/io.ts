@@ -140,10 +140,11 @@ export class Render {
       this.ctx.fillRect(this.height, 2 * this.height / 3, pannelWidth, this.height / 3);
 
       this.drawCardBoard(b1, "blue", side, startX + this.height / 24, 2 * this.height / 3 + this.height / 24);
-      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height * 3 / 24, 2 * this.height / 3 + this.height / 24);    }
+      this.drawCardBoard(b2, "blue", side, startX + this.height / 4 + this.height * 3 / 24, 2 * this.height / 3 + this.height / 24);
 
       this.drawCardBoard(r1, "red", side, startX + this.height / 24, this.height / 24);
       this.drawCardBoard(r2, "red", side, startX + this.height / 4 + this.height * 3 / 24, this.height / 24);
+    }
   }
 
   drawCardBoard(card: Card, cardSide: Side | null, playingSide: Side, startX: number, startY: number) {
@@ -211,6 +212,7 @@ export class Render {
       if (!move) throw new Error("Illegal move");
 
       move = rotatePosition(move, rotations);
+
       
       this.ctx.fillRect(startX + borderSize + cellSize * move.column,
       startY + borderSize + cellSize * move.row, innerCellSize, innerCellSize);
@@ -317,6 +319,7 @@ export class Input {
     } else {
       this.focusedSquare = null;
     }
+
   }
 
   canvasCoords(offsetX: number, offsetY: number) : {x: number, y: number} {
