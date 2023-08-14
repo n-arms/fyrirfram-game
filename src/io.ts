@@ -173,10 +173,10 @@ export class Render {
     const sideBoxX = startX + borderSize + cellSize * 2;
 
     if (cardSide === null) {
-      this.ctx.fillStyle = "blue";
+      this.ctx.fillStyle = sideOpponent(playingSide);
       this.ctx.fillRect(startX, sideBoxY, cellSize / 4, innerCellSize);
 
-      this.ctx.fillStyle = "red";
+      this.ctx.fillStyle = playingSide;
       this.ctx.fillRect(startX + size - cellSize / 4, sideBoxY, cellSize / 4, innerCellSize);
 
       rotations = 1;
@@ -285,6 +285,7 @@ export class Input {
         if (this.board.moveIsValid(move)) {
           this.board.playMove(move, this.focusedCard);
           this.side = sideOpponent(this.side);
+          this.focusedCard = null;
         }
         this.focusedSquare = null;
       } else if (this.board.findPiece(position)?.side === this.side) {
@@ -310,6 +311,7 @@ export class Input {
           if (this.board.moveIsValid(move)) {
             this.board.playMove(move, this.focusedCard);
             this.side = sideOpponent(this.side);
+            this.focusedCard = null;
           }
           this.focusedSquare = null;
         }
